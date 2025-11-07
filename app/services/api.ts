@@ -204,7 +204,6 @@ export const huntersNoRelacionalesAPI = {
 
     console.log('Actualizando hunter por NOMBRE:', nombre, hunterData);
 
-    // VERIFICAR: ¿Estás seguro de que el nombre es correcto?
     const response = await fetch(`${BASE_URL_NO_RELACIONAL}/characters/${encodeURIComponent(nombre)}`, {
       method: 'PUT',
       headers: {
