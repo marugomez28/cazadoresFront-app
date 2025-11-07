@@ -12,14 +12,14 @@ import {
   ScrollView,
 } from 'react-native';
 import { useHunterContext } from '../context/HunterContext';
-import { huntersRelacionalesAPI, Hunter } from '../services/api';
+import { huntersNoRelacionalesAPI, Hunter } from '../services/api';
 
-export default function Index() {
+export default function About() {
   const {
-    huntersRelacionales,
-    setHuntersRelacionales,
-    hunterSeleccionado,
-    setHunterSeleccionado,
+    huntersNoRelacionales,
+    setHuntersNoRelacionales,
+    hunterNoRelacionalSeleccionado,
+    setHunterNoRelacionalSeleccionado,
   } = useHunterContext();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,10 +46,10 @@ export default function Index() {
   const cargarHunters = async () => {
     try {
       setLoading(true);
-      const hunters = await huntersRelacionalesAPI.getAll();
-      setHuntersRelacionales(hunters);
+      const hunters = await huntersNoRelacionalesAPI.getAll();
+      setHuntersNoRelacionales(hunters);
     } catch (error) {
-      Alert.alert('Error', 'No se pudieron cargar los hunters');
+      Alert.alert('Error', 'No se pudieron cargar los hunters de la base no relacional');
     } finally {
       setLoading(false);
     }
@@ -63,12 +63,12 @@ export default function Index() {
 
     try {
       setLoading(true);
-      const hunter = await huntersRelacionalesAPI.getByName(searchTerm);
-      setHunterSeleccionado(hunter);
-      Alert.alert('Éxito', 'Personaje encontrado');
+      const hunter = await huntersNoRelacionalesAPI.getByName(searchTerm);
+      setHunterNoRelacionalSeleccionado(hunter);
+      Alert.alert('Éxito', 'Personaje encontrado en BD No Relacional');
       setModalVisible(true);
     } catch (error) {
-      Alert.alert('Error', 'Personaje no encontrado');
+      Alert.alert('Error', 'Personaje no encontrado en la base no relacional');
     } finally {
       setLoading(false);
     }
@@ -91,24 +91,25 @@ export default function Index() {
         descripcion: formData.descripcion || undefined,
       };
 
-      await huntersRelacionalesAPI.create(nuevoHunter);
-      Alert.alert('Éxito', 'Hunter creado correctamente');
+      await huntersNoRelacionalesAPI.create(nuevoHunter);
+      Alert.alert('Éxito', 'Hunter creado correctamente en BD No Relacional');
       setCreateModalVisible(false);
       resetForm();
       cargarHunters();
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Error al crear hunter');
+      Alert.alert('Error', error.message || 'Error al crear hunter en BD No Relacional');
     } finally {
       setLoading(false);
     }
   };
 
   const actualizarHunter = async () => {
-    if (!hunterSeleccionado) return;
+    if (!hunterNoRelacionalSeleccionado || !hunterNoRelacionalSeleccionado.id) return;
 
     try {
       setLoading(true);
       const datosActualizados = {
+        nombre: formData.nombre,
         edad: formData.edad ? parseInt(formData.edad) : undefined,
         altura: formData.altura || undefined,
         peso: formData.peso || undefined,
@@ -116,22 +117,22 @@ export default function Index() {
         descripcion: formData.descripcion || undefined,
       };
 
-      await huntersRelacionalesAPI.update(hunterSeleccionado.nombre, datosActualizados);
-      Alert.alert('Éxito', 'Hunter actualizado correctamente');
+      await huntersNoRelacionalesAPI.update(hunterNoRelacionalSeleccionado.nombre, datosActualizados);
+      Alert.alert('Éxito', 'Hunter actualizado correctamente en BD No Relacional');
       setEditModalVisible(false);
       resetForm();
       cargarHunters();
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Error al actualizar hunter');
+      Alert.alert('Error', error.message || 'Error al actualizar hunter en BD No Relacional');
     } finally {
       setLoading(false);
     }
   };
 
-  const eliminarHunter = async (nombre: string) => {
+  const eliminarHunter = async (id: string, nombre: string) => {
     Alert.alert(
       'Confirmar',
-      `¿Estás seguro de eliminar a ${nombre}?`,
+      `¿Estás seguro de eliminar a ${nombre} de la base no relacional?`,
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -139,12 +140,12 @@ export default function Index() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await huntersRelacionalesAPI.delete(nombre);
-              Alert.alert('Éxito', 'Hunter eliminado correctamente');
+              await huntersNoRelacionalesAPI.delete(id);
+              Alert.alert('Éxito', 'Hunter eliminado correctamente de BD No Relacional');
               cargarHunters();
               if (modalVisible) setModalVisible(false);
             } catch (error: any) {
-              Alert.alert('Error', error.message || 'Error al eliminar hunter');
+              Alert.alert('Error', error.message || 'Error al eliminar hunter de BD No Relacional');
             }
           },
         },
@@ -164,7 +165,7 @@ export default function Index() {
   };
 
   const abrirModalEditar = (hunter: Hunter) => {
-    setHunterSeleccionado(hunter);
+    setHunterNoRelacionalSeleccionado(hunter);
     setFormData({
       nombre: hunter.nombre,
       edad: hunter.edad?.toString() || '',
@@ -180,7 +181,7 @@ export default function Index() {
     <TouchableOpacity
       style={styles.hunterCard}
       onPress={() => {
-        setHunterSeleccionado(item);
+        setHunterNoRelacionalSeleccionado(item);
         setModalVisible(true);
       }}
     >
@@ -188,6 +189,7 @@ export default function Index() {
       <View style={styles.hunterInfo}>
         <Text style={styles.hunterName}>{item.nombre}</Text>
         <Text style={styles.hunterDetails}>Edad: {item.edad || 'N/A'}</Text>
+        <Text style={styles.databaseTag}>No Relacional</Text>
         <View style={styles.actions}>
           <TouchableOpacity
             style={[styles.button, styles.editButton]}
@@ -197,7 +199,7 @@ export default function Index() {
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.button, styles.deleteButton]}
-            onPress={() => eliminarHunter(item.nombre)}
+            onPress={() => eliminarHunter(item.id!, item.nombre)}
           >
             <Text style={styles.buttonText}>Eliminar</Text>
           </TouchableOpacity>
@@ -208,7 +210,8 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Hunter x Hunter - BD Relacional</Text>
+      <Text style={styles.title}>Hunter x Hunter - BD No Relacional</Text>
+      <Text style={styles.subtitle}>MongoDB / NoSQL Database</Text>
 
       {/* Barra de búsqueda */}
       <View style={styles.searchContainer}>
@@ -228,17 +231,22 @@ export default function Index() {
         style={styles.createButton}
         onPress={() => setCreateModalVisible(true)}
       >
-        <Text style={styles.createButtonText}>+ Nuevo Hunter</Text>
+        <Text style={styles.createButtonText}>+ Nuevo Hunter (NoSQL)</Text>
       </TouchableOpacity>
 
       {/* Lista de hunters */}
       <FlatList
-        data={huntersRelacionales}
+        data={huntersNoRelacionales}
         renderItem={renderHunterItem}
-        keyExtractor={(item) => item.nombre}
+        keyExtractor={(item) => item.id || item.nombre}
         refreshing={loading}
         onRefresh={cargarHunters}
         style={styles.list}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>
+            No hay hunters en la base de datos no relacional
+          </Text>
+        }
       />
 
       {/* Modal para ver detalles */}
@@ -248,33 +256,42 @@ export default function Index() {
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalContainer}>
-          {hunterSeleccionado && (
+          {hunterNoRelacionalSeleccionado && (
             <>
-              <Text style={styles.modalTitle}>{hunterSeleccionado.nombre}</Text>
+              <Text style={styles.modalTitle}>{hunterNoRelacionalSeleccionado.nombre}</Text>
+              <Text style={styles.databaseBadge}>BASE DE DATOS NO RELACIONAL</Text>
               <Image
-                source={{ uri: hunterSeleccionado.imageurl }}
+                source={{ uri: hunterNoRelacionalSeleccionado.imageurl }}
                 style={styles.modalImage}
               />
               <ScrollView style={styles.modalContent}>
                 <Text style={styles.modalText}>
-                  Edad: {hunterSeleccionado.edad || 'N/A'}
+                  <Text style={styles.label}>Edad:</Text> {hunterNoRelacionalSeleccionado.edad || 'N/A'}
                 </Text>
                 <Text style={styles.modalText}>
-                  Altura: {hunterSeleccionado.altura || 'N/A'}
+                  <Text style={styles.label}>Altura:</Text> {hunterNoRelacionalSeleccionado.altura || 'N/A'}
                 </Text>
                 <Text style={styles.modalText}>
-                  Peso: {hunterSeleccionado.peso || 'N/A'}
+                  <Text style={styles.label}>Peso:</Text> {hunterNoRelacionalSeleccionado.peso || 'N/A'}
                 </Text>
                 <Text style={styles.modalText}>
-                  Descripción: {hunterSeleccionado.descripcion || 'N/A'}
+                  <Text style={styles.label}>Descripción:</Text> 
                 </Text>
+                <Text style={styles.descriptionText}>
+                  {hunterNoRelacionalSeleccionado.descripcion || 'No hay descripción disponible'}
+                </Text>
+                {hunterNoRelacionalSeleccionado.id && (
+                  <Text style={styles.idText}>
+                    <Text style={styles.label}>ID:</Text> {hunterNoRelacionalSeleccionado.id}
+                  </Text>
+                )}
               </ScrollView>
               <View style={styles.modalActions}>
                 <TouchableOpacity
                   style={[styles.button, styles.editButton]}
                   onPress={() => {
                     setModalVisible(false);
-                    abrirModalEditar(hunterSeleccionado);
+                    abrirModalEditar(hunterNoRelacionalSeleccionado);
                   }}
                 >
                   <Text style={styles.buttonText}>Editar</Text>
@@ -299,6 +316,7 @@ export default function Index() {
       >
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>Crear Nuevo Hunter</Text>
+          <Text style={styles.modalSubtitle}>Base de Datos No Relacional</Text>
           <ScrollView style={styles.form}>
             <TextInput
               style={styles.input}
@@ -347,7 +365,7 @@ export default function Index() {
               disabled={loading}
             >
               <Text style={styles.buttonText}>
-                {loading ? 'Creando...' : 'Crear'}
+                {loading ? 'Creando...' : 'Crear en NoSQL'}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -367,8 +385,15 @@ export default function Index() {
         onRequestClose={() => setEditModalVisible(false)}
       >
         <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>Editar {hunterSeleccionado?.nombre}</Text>
+          <Text style={styles.modalTitle}>Editar {hunterNoRelacionalSeleccionado?.nombre}</Text>
+          <Text style={styles.modalSubtitle}>Base de Datos No Relacional</Text>
           <ScrollView style={styles.form}>
+            <TextInput
+              style={styles.input}
+              placeholder="Nombre *"
+              value={formData.nombre}
+              onChangeText={(text) => setFormData({ ...formData, nombre: text })}
+            />
             <TextInput
               style={styles.input}
               placeholder="Edad"
@@ -410,7 +435,7 @@ export default function Index() {
               disabled={loading}
             >
               <Text style={styles.buttonText}>
-                {loading ? 'Actualizando...' : 'Actualizar'}
+                {loading ? 'Actualizando...' : 'Actualizar en NoSQL'}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -430,14 +455,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f0f8ff',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
+    marginBottom: 5,
+    color: '#2c5530',
+  },
+  subtitle: {
+    fontSize: 16,
+    textAlign: 'center',
     marginBottom: 20,
-    color: '#333',
+    color: '#4a7c59',
+    fontWeight: '600',
   },
   searchContainer: {
     flexDirection: 'row',
@@ -446,14 +478,14 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#4a7c59',
     borderRadius: 8,
     padding: 10,
     marginRight: 10,
     backgroundColor: 'white',
   },
   searchButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#4a7c59',
     padding: 10,
     borderRadius: 8,
     justifyContent: 'center',
@@ -463,7 +495,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   createButton: {
-    backgroundColor: '#34C759',
+    backgroundColor: '#2c5530',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
@@ -477,6 +509,13 @@ const styles = StyleSheet.create({
   list: {
     flex: 1,
   },
+  emptyText: {
+    textAlign: 'center',
+    marginTop: 50,
+    fontSize: 16,
+    color: '#666',
+    fontStyle: 'italic',
+  },
   hunterCard: {
     flexDirection: 'row',
     backgroundColor: 'white',
@@ -488,6 +527,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    borderLeftWidth: 4,
+    borderLeftColor: '#4a7c59',
   },
   hunterImage: {
     width: 80,
@@ -502,11 +543,23 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 5,
+    color: '#2c5530',
   },
   hunterDetails: {
     fontSize: 14,
     color: '#666',
+    marginBottom: 5,
+  },
+  databaseTag: {
+    fontSize: 12,
+    color: '#4a7c59',
+    fontWeight: 'bold',
     marginBottom: 10,
+    backgroundColor: '#e8f5e8',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignSelf: 'flex-start',
   },
   actions: {
     flexDirection: 'row',
@@ -530,6 +583,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontWeight: 'bold',
+    fontSize: 12,
   },
   modalContainer: {
     flex: 1,
@@ -540,7 +594,25 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
+    marginBottom: 5,
+    color: '#2c5530',
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    textAlign: 'center',
     marginBottom: 20,
+    color: '#4a7c59',
+    fontWeight: '600',
+  },
+  databaseBadge: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#4a7c59',
+    backgroundColor: '#e8f5e8',
+    padding: 5,
+    borderRadius: 4,
+    marginBottom: 10,
   },
   modalImage: {
     width: '100%',
@@ -556,6 +628,22 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     lineHeight: 24,
   },
+  label: {
+    fontWeight: 'bold',
+    color: '#2c5530',
+  },
+  descriptionText: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+    marginBottom: 15,
+    fontStyle: 'italic',
+  },
+  idText: {
+    fontSize: 12,
+    color: '#888',
+    fontFamily: 'monospace',
+  },
   modalActions: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -566,7 +654,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#4a7c59',
     borderRadius: 8,
     padding: 12,
     marginBottom: 15,
