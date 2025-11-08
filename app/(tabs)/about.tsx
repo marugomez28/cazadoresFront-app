@@ -28,7 +28,7 @@ export default function About() {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Estado para nuevo/editar hunter
+  
   const [formData, setFormData] = useState({
     nombre: '',
     edad: '',
@@ -38,7 +38,7 @@ export default function About() {
     descripcion: '',
   });
 
-  // Cargar todos los hunters al iniciar
+
   useEffect(() => {
     cargarHunters();
   }, []);
@@ -49,7 +49,7 @@ export default function About() {
       const hunters = await huntersNoRelacionalesAPI.getAll();
       setHuntersNoRelacionales(hunters);
     } catch (error) {
-      Alert.alert('Error', 'No se pudieron cargar los hunters de la base no relacional');
+      window.alert('Error No se pudieron cargar los hunters de la base no relacional');
     } finally {
       setLoading(false);
     }
@@ -57,7 +57,7 @@ export default function About() {
 
   const buscarHunter = async () => {
     if (!searchTerm.trim()) {
-      Alert.alert('Error', 'Por favor ingresa un nombre');
+      window.alert('Error Por favor ingresa un nombre');
       return;
     }
 
@@ -65,10 +65,10 @@ export default function About() {
       setLoading(true);
       const hunter = await huntersNoRelacionalesAPI.getByName(searchTerm);
       setHunterNoRelacionalSeleccionado(hunter);
-      Alert.alert('Éxito', 'Personaje encontrado en BD No Relacional');
+      window.alert('Éxito Personaje encontrado en BD No Relacional');
       setModalVisible(true);
     } catch (error) {
-      Alert.alert('Error', 'Personaje no encontrado en la base no relacional');
+      window.alert('Error Personaje no encontrado en la base no relacional');
     } finally {
       setLoading(false);
     }
@@ -76,7 +76,7 @@ export default function About() {
 
   const crearHunter = async () => {
     if (!formData.nombre || !formData.imageurl) {
-      Alert.alert('Error', 'Nombre e imagen son obligatorios');
+      window.alert('Error Nombre e imagen son obligatorios');
       return;
     }
 
@@ -92,12 +92,12 @@ export default function About() {
       };
 
       await huntersNoRelacionalesAPI.create(nuevoHunter);
-      Alert.alert('Éxito', 'Hunter creado correctamente en BD No Relacional');
+     window.alert('Éxito Hunter creado correctamente en BD No Relacional');
       setCreateModalVisible(false);
       resetForm();
       cargarHunters();
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Error al crear hunter en BD No Relacional');
+      window.alert('Error al crear hunter en BD No Relacional');
     } finally {
       setLoading(false);
     }
@@ -118,12 +118,12 @@ export default function About() {
       };
 
       await huntersNoRelacionalesAPI.update(hunterNoRelacionalSeleccionado.nombre, datosActualizados);
-      Alert.alert('Éxito', 'Hunter actualizado correctamente en BD No Relacional');
+      window.alert('Éxito Hunter actualizado correctamente en BD No Relacional');
       setEditModalVisible(false);
       resetForm();
       cargarHunters();
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Error al actualizar hunter en BD No Relacional');
+      window.alert('Error al actualizar hunter en BD No Relacional');
     } finally {
       setLoading(false);
     }

@@ -17,9 +17,9 @@ export interface Hunter {
   updatedAt?: string;
 }
 
-// Servicios para base de datos relacional (ya funciona)
+
 export const huntersRelacionalesAPI = {
-  // ... (tu código existente)
+
   getAll: async (): Promise<Hunter[]> => {
     try {
       const response = await fetch(BASE_URL_RELACIONAL);
@@ -96,7 +96,6 @@ export const huntersRelacionalesAPI = {
   },
 };
 
-// Servicios para base de datos no relacional - CORREGIDOS
 export const huntersNoRelacionalesAPI = {
   getAll: async (): Promise<Hunter[]> => {
     try {

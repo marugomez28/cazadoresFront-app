@@ -12,23 +12,21 @@ export interface Hunter {
 }
 
 interface HunterContextType {
-  // Estados para base de datos relacional
+  
   huntersRelacionales: Hunter[];
   hunterSeleccionado: Hunter | null;
   
-  // Estados para base de datos no relacional
+
   huntersNoRelacionales: Hunter[];
   hunterNoRelacionalSeleccionado: Hunter | null;
   
-  // Funciones para relacional
+ 
   setHuntersRelacionales: (hunters: Hunter[]) => void;
   setHunterSeleccionado: (hunter: Hunter | null) => void;
   
-  // Funciones para no relacional
   setHuntersNoRelacionales: (hunters: Hunter[]) => void;
   setHunterNoRelacionalSeleccionado: (hunter: Hunter | null) => void;
-  
-  // Estado para controlar qué base de datos estamos usando
+ 
   baseDeDatosActiva: 'relacional' | 'no-relacional';
   setBaseDeDatosActiva: (base: 'relacional' | 'no-relacional') => void;
 }

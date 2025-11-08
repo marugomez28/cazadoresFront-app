@@ -28,7 +28,7 @@ export default function Index() {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Estado para nuevo/editar hunter
+
   const [formData, setFormData] = useState({
     nombre: '',
     edad: '',
@@ -38,7 +38,6 @@ export default function Index() {
     descripcion: '',
   });
 
-  // Cargar todos los hunters al iniciar
   useEffect(() => {
     cargarHunters();
   }, []);
@@ -49,7 +48,7 @@ export default function Index() {
       const hunters = await huntersRelacionalesAPI.getAll();
       setHuntersRelacionales(hunters);
     } catch (error) {
-      Alert.alert('Error', 'No se pudieron cargar los hunters');
+      window.alert('Error No se pudieron cargar los hunters');
     } finally {
       setLoading(false);
     }
@@ -57,7 +56,7 @@ export default function Index() {
 
   const buscarHunter = async () => {
     if (!searchTerm.trim()) {
-      Alert.alert('Error', 'Por favor ingresa un nombre');
+      window.alert('Error Por favor ingresa un nombre');
       return;
     }
 
@@ -65,10 +64,10 @@ export default function Index() {
       setLoading(true);
       const hunter = await huntersRelacionalesAPI.getByName(searchTerm);
       setHunterSeleccionado(hunter);
-      Alert.alert('Éxito', 'Personaje encontrado');
+     window.alert('Éxito Personaje encontrado');
       setModalVisible(true);
     } catch (error) {
-      Alert.alert('Error', 'Personaje no encontrado');
+     window.alert('Error Personaje no encontrado');
     } finally {
       setLoading(false);
     }
@@ -76,7 +75,7 @@ export default function Index() {
 
   const crearHunter = async () => {
     if (!formData.nombre || !formData.imageurl) {
-      Alert.alert('Error', 'Nombre e imagen son obligatorios');
+      window.alert('Error Nombre e imagen son obligatorios');
       return;
     }
 
@@ -92,12 +91,12 @@ export default function Index() {
       };
 
       await huntersRelacionalesAPI.create(nuevoHunter);
-      Alert.alert('Éxito', 'Hunter creado correctamente');
+      window.alert('Éxito Hunter creado correctamente');
       setCreateModalVisible(false);
       resetForm();
       cargarHunters();
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Error al crear hunter');
+      window.alert('Error al crear hunter');
     } finally {
       setLoading(false);
     }
@@ -117,40 +116,32 @@ export default function Index() {
       };
 
       await huntersRelacionalesAPI.update(hunterSeleccionado.nombre, datosActualizados);
-      Alert.alert('Éxito', 'Hunter actualizado correctamente');
+      window.alert('Éxito Hunter actualizado correctamente');
       setEditModalVisible(false);
       resetForm();
       cargarHunters();
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Error al actualizar hunter');
+      window.alert('Error al actualizar hunter');
     } finally {
       setLoading(false);
     }
   };
 
-  const eliminarHunter = async (nombre: string) => {
-    Alert.alert(
-      'Confirmar',
-      `¿Estás seguro de eliminar a ${nombre}?`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await huntersRelacionalesAPI.delete(nombre);
-              Alert.alert('Éxito', 'Hunter eliminado correctamente');
-              cargarHunters();
-              if (modalVisible) setModalVisible(false);
-            } catch (error: any) {
-              Alert.alert('Error', error.message || 'Error al eliminar hunter');
-            }
-          },
-        },
-      ]
-    );
-  };
+ const eliminarHunter = async (nombre: string) => {
+ 
+  const confirmar = window.confirm(`¿Estás seguro de eliminar a ${nombre}?`);
+  
+  if (confirmar) {
+    try {
+      await huntersRelacionalesAPI.delete(nombre);
+      window.alert('Éxito: Hunter eliminado correctamente');
+      cargarHunters();
+      if (modalVisible) setModalVisible(false);
+    } catch (error: any) {
+      window.alert('Error: Error al eliminar hunter');
+    }
+  }
+};
 
   const resetForm = () => {
     setFormData({
@@ -210,7 +201,6 @@ export default function Index() {
     <View style={styles.container}>
       <Text style={styles.title}>Hunter x Hunter - BD Relacional</Text>
 
-      {/* Barra de búsqueda */}
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
@@ -223,7 +213,7 @@ export default function Index() {
         </TouchableOpacity>
       </View>
 
-      {/* Botón para crear nuevo hunter */}
+  
       <TouchableOpacity
         style={styles.createButton}
         onPress={() => setCreateModalVisible(true)}
@@ -231,7 +221,6 @@ export default function Index() {
         <Text style={styles.createButtonText}>+ Nuevo Hunter</Text>
       </TouchableOpacity>
 
-      {/* Lista de hunters */}
       <FlatList
         data={huntersRelacionales}
         renderItem={renderHunterItem}
@@ -241,7 +230,7 @@ export default function Index() {
         style={styles.list}
       />
 
-      {/* Modal para ver detalles */}
+
       <Modal
         visible={modalVisible}
         animationType="slide"
@@ -291,7 +280,7 @@ export default function Index() {
         </View>
       </Modal>
 
-      {/* Modal para crear hunter */}
+ 
       <Modal
         visible={createModalVisible}
         animationType="slide"
@@ -360,7 +349,7 @@ export default function Index() {
         </View>
       </Modal>
 
-      {/* Modal para editar hunter */}
+     
       <Modal
         visible={editModalVisible}
         animationType="slide"
