@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
-  Alert,
   StyleSheet,
   Image,
   Modal,
@@ -28,7 +27,6 @@ export default function About() {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  
   const [formData, setFormData] = useState({
     nombre: '',
     edad: '',
@@ -37,7 +35,6 @@ export default function About() {
     imageurl: '',
     descripcion: '',
   });
-
 
   useEffect(() => {
     cargarHunters();
@@ -49,7 +46,7 @@ export default function About() {
       const hunters = await huntersNoRelacionalesAPI.getAll();
       setHuntersNoRelacionales(hunters);
     } catch (error) {
-      window.alert('Error No se pudieron cargar los hunters de la base no relacional');
+      window.alert('Error: No se pudieron cargar los hunters de la base no relacional');
     } finally {
       setLoading(false);
     }
@@ -57,7 +54,7 @@ export default function About() {
 
   const buscarHunter = async () => {
     if (!searchTerm.trim()) {
-      window.alert('Error Por favor ingresa un nombre');
+      window.alert('Error: Por favor ingresa un nombre');
       return;
     }
 
@@ -65,10 +62,10 @@ export default function About() {
       setLoading(true);
       const hunter = await huntersNoRelacionalesAPI.getByName(searchTerm);
       setHunterNoRelacionalSeleccionado(hunter);
-      window.alert('Éxito Personaje encontrado en BD No Relacional');
+      window.alert('Éxito: Personaje encontrado en BD No Relacional');
       setModalVisible(true);
     } catch (error) {
-      window.alert('Error Personaje no encontrado en la base no relacional');
+      window.alert('Error: Personaje no encontrado en la base no relacional');
     } finally {
       setLoading(false);
     }
@@ -76,7 +73,7 @@ export default function About() {
 
   const crearHunter = async () => {
     if (!formData.nombre || !formData.imageurl) {
-      window.alert('Error Nombre e imagen son obligatorios');
+      window.alert('Error: Nombre e imagen son obligatorios');
       return;
     }
 
@@ -92,12 +89,12 @@ export default function About() {
       };
 
       await huntersNoRelacionalesAPI.create(nuevoHunter);
-     window.alert('Éxito Hunter creado correctamente en BD No Relacional');
+      window.alert('Éxito: Hunter creado correctamente en BD No Relacional');
       setCreateModalVisible(false);
       resetForm();
       cargarHunters();
     } catch (error: any) {
-      window.alert('Error al crear hunter en BD No Relacional');
+      window.alert('Error: Error al crear hunter en BD No Relacional');
     } finally {
       setLoading(false);
     }
@@ -118,39 +115,30 @@ export default function About() {
       };
 
       await huntersNoRelacionalesAPI.update(hunterNoRelacionalSeleccionado.nombre, datosActualizados);
-      window.alert('Éxito Hunter actualizado correctamente en BD No Relacional');
+      window.alert('Éxito: Hunter actualizado correctamente en BD No Relacional');
       setEditModalVisible(false);
       resetForm();
       cargarHunters();
     } catch (error: any) {
-      window.alert('Error al actualizar hunter en BD No Relacional');
+      window.alert('Error: Error al actualizar hunter en BD No Relacional');
     } finally {
       setLoading(false);
     }
   };
 
   const eliminarHunter = async (id: string, nombre: string) => {
-    Alert.alert(
-      'Confirmar',
-      `¿Estás seguro de eliminar a ${nombre} de la base no relacional?`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await huntersNoRelacionalesAPI.delete(id);
-              Alert.alert('Éxito', 'Hunter eliminado correctamente de BD No Relacional');
-              cargarHunters();
-              if (modalVisible) setModalVisible(false);
-            } catch (error: any) {
-              Alert.alert('Error', error.message || 'Error al eliminar hunter de BD No Relacional');
-            }
-          },
-        },
-      ]
-    );
+    const confirmar = window.confirm(`¿Estás seguro de eliminar a ${nombre} de la base no relacional?`);
+    
+    if (confirmar) {
+      try {
+        await huntersNoRelacionalesAPI.delete(nombre);
+        window.alert('Éxito: Hunter eliminado correctamente de BD No Relacional');
+        cargarHunters();
+        if (modalVisible) setModalVisible(false);
+      } catch (error: any) {
+        window.alert('Error: Error al eliminar hunter de BD No Relacional');
+      }
+    }
   };
 
   const resetForm = () => {
@@ -213,7 +201,6 @@ export default function About() {
       <Text style={styles.title}>Hunter x Hunter - BD No Relacional</Text>
       <Text style={styles.subtitle}>MongoDB / NoSQL Database</Text>
 
-      {/* Barra de búsqueda */}
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
@@ -226,7 +213,6 @@ export default function About() {
         </TouchableOpacity>
       </View>
 
-      {/* Botón para crear nuevo hunter */}
       <TouchableOpacity
         style={styles.createButton}
         onPress={() => setCreateModalVisible(true)}
@@ -234,7 +220,6 @@ export default function About() {
         <Text style={styles.createButtonText}>+ Nuevo Hunter (NoSQL)</Text>
       </TouchableOpacity>
 
-      {/* Lista de hunters */}
       <FlatList
         data={huntersNoRelacionales}
         renderItem={renderHunterItem}
@@ -249,7 +234,6 @@ export default function About() {
         }
       />
 
-      {/* Modal para ver detalles */}
       <Modal
         visible={modalVisible}
         animationType="slide"
@@ -308,7 +292,6 @@ export default function About() {
         </View>
       </Modal>
 
-      {/* Modal para crear hunter */}
       <Modal
         visible={createModalVisible}
         animationType="slide"
@@ -378,7 +361,6 @@ export default function About() {
         </View>
       </Modal>
 
-      {/* Modal para editar hunter */}
       <Modal
         visible={editModalVisible}
         animationType="slide"
